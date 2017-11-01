@@ -1,0 +1,125 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>Highcharts Example</title>
+
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+		<script type="text/javascript">
+$(function () {
+    $(document).ready(function() {
+        Highcharts.setOptions({
+            global: {
+                useUTC: false
+            }
+        });
+    
+	    function bytesToSize(bytes, precision) {
+	    	var sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+	    	var posttxt = 0;
+	    	while( bytes >= 1024 ) {
+	        	posttxt++;
+	        	bytes = bytes / 1024;
+	    	}
+	    	return parseInt(bytes).toFixed(posttxt==0?0:precision) + " " + sizes[posttxt];
+		};
+		
+        var chart;
+        chart = new Highcharts.Chart({
+            chart: {
+                renderTo: 'container',
+                type: 'spline',
+                marginRight: 10,
+                events: {
+                    load: function() {
+    
+                        // set up the updating of the chart each second
+                        var series = this.series;
+                        setInterval(function() {
+							jQuery.get('updown_latest.dat', null, function(dat, state, xhr) {
+								var x = (new Date()).getTime()
+								
+								dat = dat.split(/,/);
+								
+								var up_speed 	= parseInt(dat[0]);
+								var down_speed	= parseInt(dat[1])
+								
+								series[0].addPoint([x, up_speed], true, series[0].data.length>100);
+								series[1].addPoint([x, down_speed], true, series[1].data.length>100);
+							});
+                        }, 5000);
+                    }
+                }
+            }, 
+            credits: {
+            	enabled: false
+        	},
+ 			plotOptions: {
+            	series: {
+               		marker: {
+                    	radius: 0
+                	}
+            	}
+        	},
+            title: {
+                text: 'Upload/Download Rates'
+            },
+            xAxis: {
+                type: 'datetime',
+                tickPixelInterval: 150
+            },
+            yAxis: {
+            	min:0,
+                title: {
+                    text: 'Rate'
+                },
+                labels: {
+                	formatter: function() {
+                 		return bytesToSize( this.value, 1 ) +'/sec';
+                    },
+				},
+                plotLines: [{
+                    value: 0,
+                    width: 1,
+                    color: '#808080'
+                },{
+					value: 0,
+                    width: 1,
+                    color: '#308080'
+				}]
+            },
+            tooltip: {
+                formatter: function() {
+                        return '<b>'+ this.series.name +'</b><br/>'+
+                        Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) +'<br/>'+
+                        bytesToSize( this.y, 1 ) +'/sec';
+                }
+            },
+            legend: {
+                enabled: true
+            },
+            exporting: {
+                enabled: false
+            },
+            series: [{
+                name: 'Upload',
+                data: []
+            },{
+				name: 'Download',
+				data: []
+			}]
+        });
+    });
+    
+});
+		</script>
+	</head>
+	<body>
+<script src="../../js/highcharts.js"></script>
+<script src="../../js/modules/exporting.js"></script>
+
+<div id="container" style="min-width: 400px; height: 400px; margin: 0 auto"></div>
+
+	<p align="right">Thanks to <a href="http://www.highcharts.com/" target="_blank">highcharts.com</a> for this demo!</p>
+	</body>
+</html>
