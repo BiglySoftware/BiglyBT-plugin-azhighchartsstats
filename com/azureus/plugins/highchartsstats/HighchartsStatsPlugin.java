@@ -202,8 +202,8 @@ HighchartsStatsPlugin
 				
 				DownloadManagerStats stats = plugin_interface.getDownloadManager().getStats();
 				
-				int send	= stats.getDataSendRate() + stats.getProtocolSendRate();
-				int rec 	= stats.getDataReceiveRate() + stats.getProtocolReceiveRate();
+				long send	= stats.getDataSendRate() + stats.getProtocolSendRate();
+				long rec 	= stats.getDataReceiveRate() + stats.getProtocolReceiveRate();
 				
 				pw.println( send + "," + rec );
 				
